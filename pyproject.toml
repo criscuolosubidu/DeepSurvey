@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "deepsurvey"
+version = "0.1.0"
+description = "深入调研并且完成综述"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    {name = "criscuolosubidu"}
+]
+dependencies = [
+    "arxiv>=2.2.0",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = {find = {where = ["src"]}}
+include-package-data = true
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+]
+
+[tool.pytest]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: 标记集成测试",
+]
