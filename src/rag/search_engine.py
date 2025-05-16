@@ -14,7 +14,6 @@ class SearchEngineConfig:
     default_market: str = "en-US"
     default_sort_by: str = arxiv.SortCriterion.Relevance
     arxiv_base_url: str = "http://export.arxiv.org/api/query"
-    bing_base_url: str = "https://api.bing.microsoft.com/v7.0/search"
 
 
 @dataclass
@@ -168,54 +167,6 @@ class GoogleScholarSearchEngine(SearchEngine, AcademicSearchStrategy):
         ]
 
 
-# 通用搜索引擎实现
-class BingSearchEngine(SearchEngine, GeneralSearchStrategy):
-    """Bing搜索引擎实现"""
-    
-    def __init__(self, config: SearchEngineConfig = None, api_key: str = None, max_results: Optional[int] = None):
-        self.config = config or SearchEngineConfig()
-        self.api_key = api_key
-        self.max_results = max_results or self.config.default_max_results
-        self.base_url = self.config.bing_base_url
-        self.logger = SearchLogger("bing_engine")
-    
-    def search(self, query: str, **kwargs) -> List[SearchResult]:
-        """实现基类的搜索方法，调用通用搜索策略"""
-        self.logger.info("开始Bing搜索", query=query, **kwargs)
-        return self.search_web(query, **kwargs)
-    
-    def search_web(self, query: str, **kwargs) -> List[SearchResult]:
-        """实现通用网页搜索"""
-        headers = {"Ocp-Apim-Subscription-Key": self.api_key}
-        params = {
-            "q": query,
-            "count": kwargs.get("max_results", self.max_results),
-            "mkt": kwargs.get("market", self.config.default_market)
-        }
-        
-        self.logger.debug("执行Bing搜索", query=query, params=params)
-        
-        try:
-            response = requests.get(self.base_url, headers=headers, params=params)
-            data = response.json()
-            
-            results = []
-            # 解析Bing API返回的结果
-            if "webPages" in data and "value" in data["webPages"]:
-                for item in data["webPages"]["value"]:
-                    results.append(SearchResult(
-                        title=item.get("name", ""),
-                        url=item.get("url", ""),
-                        snippet=item.get("snippet", ""),
-                        source="Bing"
-                    ))
-            self.logger.info("Bing搜索完成", found_results=len(results))
-            return results
-        except Exception as e:
-            self.logger.error("Bing搜索出错", error=str(e), query=query)
-            return []
-
-
 # 搜索引擎工厂
 class SearchEngineFactory:
     """搜索引擎工厂，负责创建和管理搜索引擎实例"""
@@ -226,7 +177,7 @@ class SearchEngineFactory:
         创建搜索引擎实例
         
         Args:
-            engine_type: 搜索引擎类型('arxiv', 'google_scholar', 'bing'等)
+            engine_type: 搜索引擎类型('arxiv', 'google_scholar'等)
             config: 搜索引擎配置对象
             **engine_config: 搜索引擎具体配置参数
             
@@ -247,17 +198,10 @@ class SearchEngineFactory:
                 api_key=engine_config.get("api_key"),
                 max_results=engine_config.get("max_results")
             )
-        elif engine_type == "bing":
-            return BingSearchEngine(
-                config=config,
-                api_key=engine_config.get("api_key"),
-                max_results=engine_config.get("max_results")
-            )
         else:
             raise ValueError(f"不支持的搜索引擎类型: {engine_type}")
 
 
-# 复合搜索引擎，可以组合多个搜索引擎
 class CompositeSearchEngine(SearchEngine):
     """组合多个搜索引擎的复合引擎"""
     
@@ -278,57 +222,3 @@ class CompositeSearchEngine(SearchEngine):
         # 可以在这里添加结果去重、排序等逻辑
         
         return all_results
-
-
-# 使用示例
-def search_example():
-    # 创建配置实例
-    config = SearchEngineConfig()
-    
-    # 创建搜索日志记录器
-    logger = SearchLogger("search_example")
-    
-    # 创建各种搜索引擎
-    logger.info("初始化arXiv搜索引擎")
-    arxiv_engine = SearchEngineFactory.create_engine(
-        "arxiv", 
-        config=config,
-        max_results=5
-    )
-    
-    # 假设我们有API密钥
-    logger.info("初始化Bing搜索引擎")
-    bing_engine = SearchEngineFactory.create_engine(
-        "bing", 
-        config=config,
-        api_key="your_bing_api_key",
-        max_results=5
-    )
-    
-    # 创建复合搜索引擎
-    logger.info("创建复合搜索引擎")
-    composite_engine = CompositeSearchEngine()
-    composite_engine.add_engine(arxiv_engine)
-    composite_engine.add_engine(bing_engine)
-    
-    # 执行搜索
-    query = "机器学习深度学习综述"
-    logger.info("开始执行复合搜索", query=query)
-    results = composite_engine.search(
-        query, 
-        max_results=10
-    )
-    
-    # 处理结果
-    logger.info(f"搜索完成，共获取{len(results)}条结果")
-    for result in results:
-        print(f"标题: {result.title}")
-        print(f"来源: {result.source}")
-        print(f"URL: {result.url}")
-        print(f"摘要: {result.snippet}")
-        print("-" * 50)
-
-
-if __name__ == "__main__":
-    # 运行示例
-    search_example()
