@@ -1,19 +1,13 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List, Any, Optional, Union
-import requests
 from dataclasses import dataclass
 
 import arxiv
-from src.utils.logger import SearchLogger, LogConfig
-
-
-@dataclass
-class SearchEngineConfig:
-    """搜索引擎配置类"""
-    default_max_results: int = 10
-    default_market: str = "en-US"
-    default_sort_by: str = arxiv.SortCriterion.Relevance
-    arxiv_base_url: str = "http://export.arxiv.org/api/query"
+from src.utils.logger import SearchLogger
+from rag.config import ArxivConfig, GoogleScholarConfig, ConfigFactory, SearchEngineType
+import requests
+import json
+import time
 
 
 @dataclass
@@ -51,14 +45,15 @@ class ArxivSearchEngine(SearchEngine, AcademicSearchStrategy):
     
     def __init__(
             self, 
-            config: SearchEngineConfig = None, 
+            config: ArxivConfig = None, 
             api_key: Optional[str] = None, 
             max_results: Optional[int] = None
         ):
-        self.config = config or SearchEngineConfig()
-        self.api_key = api_key
-        self.max_results = max_results or self.config.default_max_results
-        self.base_url = self.config.arxiv_base_url
+        self.config = config or ConfigFactory.create_config(SearchEngineType.ARXIV.value)
+        if api_key:
+            self.config.api_key = api_key
+        if max_results:
+            self.config.max_results = max_results
         self.logger = SearchLogger("arxiv_engine")
     
     def search(self, query: str, **kwargs) -> List[SearchResult]:
@@ -69,8 +64,8 @@ class ArxivSearchEngine(SearchEngine, AcademicSearchStrategy):
         # 创建arxiv client
         client = arxiv.Client()
 
-        max_results = kwargs.get('max_results', self.max_results)
-        sort_by = kwargs.get('sort_by', self.config.default_sort_by)
+        max_results = kwargs.get('max_results', self.config.max_results)
+        sort_by = kwargs.get('sort_by', self.config.sort_by)
 
         # 完成 max_results 和 sort_by 的类型检查
         # 检查 max_results 类型
@@ -84,6 +79,9 @@ class ArxivSearchEngine(SearchEngine, AcademicSearchStrategy):
             max_results = 10
             
         # 检查 sort_by 类型
+        if not sort_by: # 因为默认是没有排序规则的，所以这里需要加上一个arXiv的排序规则
+            sort_by = arxiv.SortCriterion.Relevance
+
         if not isinstance(sort_by, arxiv.SortCriterion):
             # 尝试将字符串转换为SortCriterion
             if isinstance(sort_by, str):
@@ -144,55 +142,176 @@ class ArxivSearchEngine(SearchEngine, AcademicSearchStrategy):
 class GoogleScholarSearchEngine(SearchEngine, AcademicSearchStrategy):
     """Google Scholar搜索引擎实现"""
     
-    def __init__(self, config: SearchEngineConfig = None, api_key: str = None, max_results: Optional[int] = None):
-        self.config = config or SearchEngineConfig()
-        self.api_key = api_key
-        self.max_results = max_results or self.config.default_max_results
+    def __init__(
+            self, 
+            config: GoogleScholarConfig = None, 
+            api_key: str = None, 
+            max_results: Optional[int] = None
+        ):
+        self.config = config or ConfigFactory.create_config(SearchEngineType.GOOGLE_SCHOLAR.value)
+        if api_key:
+            self.config.api_key = api_key
+        if max_results:
+            self.config.max_results = max_results
+        self.logger = SearchLogger("google_scholar_engine")
     
     def search(self, query: str, **kwargs) -> List[SearchResult]:
         """实现基类的搜索方法，调用学术搜索策略"""
+        self.logger.info("开始Google Scholar搜索", query=query, **kwargs)
         return self.search_papers(query, **kwargs)
     
     def search_papers(self, query: str, **kwargs) -> List[SearchResult]:
-        """实现Google Scholar搜索"""
-        # 实际实现中需要使用第三方库或自建爬虫，因为Google Scholar没有官方API
-        # 这里仅作为示例
-        return [
-            SearchResult(
-                title="Google Scholar Paper Example",
-                url="https://scholar.google.com/example",
-                snippet="Example snippet from Google Scholar",
-                source="Google Scholar"
-            )
-        ]
+        """实现Google Scholar搜索，支持分页获取多个结果"""
+        max_results = kwargs.get('max_results', self.config.max_results)
+        timeout = kwargs.get('timeout', self.config.timeout)
+        api_key = kwargs.get('api_key', self.config.api_key)
+        
+        if not api_key:
+            error_msg = "缺少Google Scholar API Key"
+            self.logger.error(error_msg)
+            raise ValueError(error_msg)
+              
+        url = self.config.base_url
+        base_payload = {
+            "q": query,
+            "hl": self.config.hl,
+            "as_sdt": self.config.as_sdt,
+            "as_vis": self.config.as_vis
+        }
+        
+        # 添加其他可选参数
+        for key, value in kwargs.items():
+            if key not in ['max_results', 'timeout', 'api_key', 'page']:
+                base_payload[key] = value
+        
+        headers = {
+            'X-API-KEY': api_key,
+            'Content-Type': 'application/json'
+        }
+        
+        self.logger.debug("准备执行Google Scholar分页搜索", query=query, max_results=max_results)
+        
+        all_results = []
+        current_page = 1
+        results_per_page = 10  # Google Scholar API通常每页返回10条结果
+        
+        # 计算需要请求的最大的页数
+        max_pages = (max_results + results_per_page - 1) // results_per_page
+        
+        try:
+            while len(all_results) < max_results and current_page <= max_pages:
+                payload = base_payload.copy()
+                payload["page"] = current_page
+                
+                self.logger.debug(f"请求第{current_page}页搜索结果", payload=payload)
+                
+                response = requests.request(
+                    "POST", 
+                    url, 
+                    headers=headers, 
+                    data=json.dumps(payload),
+                    timeout=timeout
+                )
+                response.raise_for_status()
+                response_data = response.json()
+                
+                papers = response_data.get('organic', [])
+                
+                # 如果返回的论文为空，说明没有更多结果了
+                if not papers:
+                    self.logger.debug(f"第{current_page}页无结果，停止请求")
+                    break
+                
+                # 处理搜索得到的结果
+                for paper in papers:
+                    metadata = {
+                        "year": paper.get("year"),
+                        "citedBy": paper.get("citedBy")
+                    }
+                    
+                    if "pdfUrl" in paper:
+                        metadata["pdfUrl"] = paper.get("pdfUrl")
+                    
+                    if "id" in paper:
+                        metadata["id"] = paper.get("id")
+                    
+                    if "publicationInfo" in paper:
+                        metadata["publicationInfo"] = paper.get("publicationInfo")
+                    
+                    search_result = SearchResult(
+                        title=paper.get("title", ""),
+                        url=paper.get("link", ""),
+                        snippet=paper.get("snippet", ""),
+                        source="Google Scholar",
+                        metadata=metadata
+                    )
+                    all_results.append(search_result)
+                    
+                    # 如果已经达到了请求的结果数量，就停止处理
+                    if len(all_results) >= max_results:
+                        break
+                
+                # 请求下一页
+                current_page += 1
+                
+                # 添加请求间隔，避免触发API限制
+                if current_page <= max_pages and len(all_results) < max_results:
+                    time.sleep(1)  # 每次请求间隔1秒
+            
+            self.logger.info("Google Scholar搜索完成", 
+                             found_results=len(all_results), 
+                             requested_pages=current_page-1,
+                             max_results=max_results)
+            
+            # 确保结果数量不超过max_results
+            return all_results[:max_results]
+        
+        except requests.exceptions.Timeout:
+            self.logger.error("Google Scholar搜索超时", timeout=timeout, query=query)
+            return all_results if all_results else []
+            
+        except requests.exceptions.HTTPError as e:
+            status_code = getattr(e.response, 'status_code', None)
+            self.logger.error(f"Google Scholar HTTP错误", 
+                             error=str(e), 
+                             status_code=status_code, 
+                             query=query,
+                             current_page=current_page)
+            return all_results if all_results else []
+            
+        except Exception as e:
+            self.logger.error(f"Google Scholar搜索出错", 
+                             error=str(e), 
+                             query=query,
+                             current_page=current_page)
+            return all_results if all_results else []
 
 
-# 搜索引擎工厂
 class SearchEngineFactory:
     """搜索引擎工厂，负责创建和管理搜索引擎实例"""
     
     @staticmethod
-    def create_engine(engine_type: str, config: SearchEngineConfig = None, **engine_config) -> SearchEngine:
+    def create_engine(engine_type: str, **engine_config) -> SearchEngine:
         """
         创建搜索引擎实例
         
         Args:
             engine_type: 搜索引擎类型('arxiv', 'google_scholar'等)
-            config: 搜索引擎配置对象
             **engine_config: 搜索引擎具体配置参数
             
         Returns:
             创建的搜索引擎实例
         """
-        config = config or SearchEngineConfig()
+        # 创建引擎特定的配置
+        config = ConfigFactory.create_config(engine_type, **engine_config)
         
-        if engine_type == "arxiv":
+        if engine_type == SearchEngineType.ARXIV.value:
             return ArxivSearchEngine(
                 config=config,
                 api_key=engine_config.get("api_key"),
                 max_results=engine_config.get("max_results")
             )
-        elif engine_type == "google_scholar":
+        elif engine_type == SearchEngineType.GOOGLE_SCHOLAR.value:
             return GoogleScholarSearchEngine(
                 config=config,
                 api_key=engine_config.get("api_key"),
@@ -218,7 +337,4 @@ class CompositeSearchEngine(SearchEngine):
         for engine in self.engines:
             results = engine.search(query, **kwargs)
             all_results.extend(results)
-        
-        # 可以在这里添加结果去重、排序等逻辑
-        
         return all_results

@@ -1,7 +1,8 @@
 import unittest
 import pytest
 import arxiv
-from src.rag.search_engine import ArxivSearchEngine, SearchEngineConfig
+from src.rag.search_engine import ArxivSearchEngine
+from src.rag.config import ArxivConfig
 
 
 @pytest.mark.integration
@@ -9,7 +10,7 @@ class TestArxivIntegration(unittest.TestCase):
     """ArxivSearchEngine集成测试"""
     
     def setUp(self):
-        self.config = SearchEngineConfig(default_max_results=3)
+        self.config = ArxivConfig(max_results=3)
         self.engine = ArxivSearchEngine(config=self.config)
     
     @pytest.mark.integration

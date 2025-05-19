@@ -2,20 +2,21 @@ import unittest
 from unittest.mock import patch, MagicMock
 import arxiv
 
-from src.rag.search_engine import ArxivSearchEngine, SearchEngineConfig, SearchResult
+from src.rag.search_engine import ArxivSearchEngine, SearchResult
+from src.rag.config import ArxivConfig
 
 
 class TestArxivSearchEngine(unittest.TestCase):
     
     def setUp(self):
         """测试前的设置"""
-        self.config = SearchEngineConfig(default_max_results=5)
+        self.config = ArxivConfig(max_results=5)
         self.engine = ArxivSearchEngine(config=self.config)
     
     def test_init(self):
         """测试初始化参数是否正确"""
-        self.assertEqual(self.engine.max_results, 5)
-        self.assertEqual(self.engine.base_url, self.config.arxiv_base_url)
+        self.assertEqual(self.engine.config.max_results, 5)
+        self.assertEqual(self.engine.config.base_url, "http://export.arxiv.org/api/query")
     
     @patch('arxiv.Client')
     def test_search_papers(self, mock_client):

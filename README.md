@@ -27,7 +27,6 @@ DeepSurvey 提供了一个现代化的前端界面，兼顾用户体验与功能
 
 ## 快速开始
 
-（此处可根据实际部署需求补充安装和运行说明，例如依赖安装、配置环境等）
 
 1. 克隆仓库：
   
@@ -40,13 +39,69 @@ DeepSurvey 提供了一个现代化的前端界面，兼顾用户体验与功能
   ```bash
   pip install -r requirements.txt
   ```
+
+3. 配置环境变量（可选）：
+
+   创建`.env`文件在项目根目录，配置以下变量：
+   ```
+   # 翻译
+   TRANSLATOR_MODEL="您的模型ID"
+   TRANSLATOR_API_URL="您的API URL"
+   TRANSLATOR_API_KEY="您的API密钥"
+   ```
   
-3. 启动服务：
+4. 启动服务：
   
   ```bash
   python main.py
   ```
-  
+
+## 搜索引擎配置系统
+
+DeepSurvey 提供了一个灵活的搜索引擎配置系统，用于管理各种搜索引擎的配置：
+
+### 使用示例
+
+```python
+# 导入配置相关类
+from src.utils.config import ConfigFactory, SearchEngineType
+from src.rag.search_engine import SearchEngineFactory
+
+# 使用默认配置创建 Arxiv 搜索引擎
+arxiv_engine = SearchEngineFactory.create_engine(SearchEngineType.ARXIV.value)
+
+# 使用自定义配置创建 Google Scholar 搜索引擎
+gs_engine = SearchEngineFactory.create_engine(
+    SearchEngineType.GOOGLE_SCHOLAR.value,
+    max_results=20,
+    include_patents=True,
+    api_key="your_api_key"
+)
+
+# 搜索示例
+results = arxiv_engine.search("机器学习最新进展")
+```
+
+### 扩展自定义搜索引擎
+
+您可以通过以下步骤轻松扩展系统支持新的搜索引擎：
+
+1. 在 `src/rag/config.py` 中添加新的配置类
+2. 在 `ConfigFactory` 中注册新的配置类
+3. 在 `src/rag/search_engine.py` 中实现相应的搜索引擎类
+4. 在 `SearchEngineFactory` 中添加新搜索引擎的创建逻辑
+
+```python
+# 步骤1: 添加自定义配置类
+@dataclass
+class MyCustomConfig(BaseEngineConfig):
+    custom_param: str = "default_value"
+
+# 步骤2: 注册配置类
+ConfigFactory.register_config("my_custom_engine", MyCustomConfig)
+
+# 步骤3-4: 实现搜索引擎并更新工厂(在相应的文件中)
+```
 
 ## 贡献
 

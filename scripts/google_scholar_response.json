@@ -1,0 +1,113 @@
+{
+    "searchParameters": {
+        "q": "transformer",
+        "hl": "en",
+        "type": "scholar",
+        "as_vis": "1",
+        "as_sdt": "0,5",
+        "engine": "google-scholar"
+    },
+    "organic": [
+        {
+            "title": "Transformer in transformer",
+            "link": "https://proceedings.neurips.cc/paper/2021/hash/854d9fca60b4bd07f9bb215d59ef5561-Abstract.html",
+            "publicationInfo": "K Han, A Xiao, E Wu, J Guo, C Xu… - Advances in neural …, 2021 - proceedings.neurips.cc",
+            "snippet": "… Transformer is a new kind of neural architecture which encodes the input data as powerful features via the attention mechanism. Basically, the visual transformers … visual transformers …",
+            "year": 2021,
+            "citedBy": 2113,
+            "pdfUrl": "https://proceedings.neurips.cc/paper_files/paper/2021/file/854d9fca60b4bd07f9bb215d59ef5561-Paper.pdf",
+            "id": "_9P7mh-CUNIJ"
+        },
+        {
+            "title": "A survey on vision transformer",
+            "link": "https://ieeexplore.ieee.org/abstract/document/9716741/",
+            "publicationInfo": "K Han, Y Wang, H Chen, X Chen, J Guo… - IEEE transactions on …, 2022 - ieeexplore.ieee.org",
+            "snippet": "… transformer is receiving more and more attention from the computer vision community. In this paper, we review these vision transformer … transformer methods for pushing transformer into …",
+            "year": 2022,
+            "citedBy": 3243,
+            "pdfUrl": "https://event-cdn.baai.ac.cn/file/20211014-01/2021.10.14-%E6%99%BA%E6%BA%90-Transformer.pdf",
+            "id": "G7PR8u-tYDsJ"
+        },
+        {
+            "title": "Image transformer",
+            "link": "http://proceedings.mlr.press/v80/parmar18a.html",
+            "publicationInfo": "N Parmar, A Vaswani, J Uszkoreit… - International …, 2018 - proceedings.mlr.press",
+            "snippet": "Image generation has been successfully cast as an autoregressive sequence generation or transformation problem. Recent work has shown that self-attention is an effective way of …",
+            "year": 2018,
+            "citedBy": 2270,
+            "pdfUrl": "http://proceedings.mlr.press/v80/parmar18a/parmar18a.pdf",
+            "id": "mkZbeI95cm4J"
+        },
+        {
+            "title": "Point transformer",
+            "link": "https://openaccess.thecvf.com/content/ICCV2021/html/Zhao_Point_Transformer_ICCV_2021_paper.html?ref=;",
+            "publicationInfo": "H Zhao, L Jiang, J Jia, PHS Torr… - Proceedings of the …, 2021 - openaccess.thecvf.com",
+            "snippet": "… We begin by briefly revisiting the general formulation of transformers and self-attention operators. Then we present the point transformer layer for 3D point cloud processing. Lastly, we …",
+            "year": 2021,
+            "citedBy": 2684,
+            "pdfUrl": "http://openaccess.thecvf.com/content/ICCV2021/papers/Zhao_Point_Transformer_ICCV_2021_paper.pdf",
+            "id": "G2UyBewqnKQJ"
+        },
+        {
+            "title": "Transformer engineering",
+            "link": "https://api.taylorfrancis.com/content/books/mono/download?identifierName=doi&identifierValue=10.1201/b13011&type=googlepdf",
+            "publicationInfo": "SV Kulkarni, SA Khaparde - 2004 - api.taylorfrancis.com",
+            "snippet": "… of transformers: rectifier transformers, HVDC converter transformers, furnace transformers, … , gas-insulated transformers are lighter than oil-immersed transformers. The dielectric strength …",
+            "year": 2004,
+            "citedBy": 1521,
+            "pdfUrl": "https://www.academia.edu/download/62221966/Transformer_Engineering__DesignTechnology_and_Diagnostics2nd_Edition-2-74320200227-9993-u5i1kj.pdf",
+            "id": "q_0a2mbsfqsJ"
+        },
+        {
+            "title": "Reformer: The efficient transformer",
+            "link": "https://arxiv.org/abs/2001.04451",
+            "publicationInfo": "N Kitaev, Ł Kaiser, A Levskaya - arXiv preprint arXiv:2001.04451, 2020 - arxiv.org",
+            "snippet": "… We call a model that behaves like this a shared-QK Transformer. It turns out that sharing QK does not affect the performance of Transformer, even if we additionally normalize the length …",
+            "year": 2001,
+            "citedBy": 3373,
+            "pdfUrl": "https://arxiv.org/pdf/2001.04451",
+            "id": "jYu0qEO9iOkJ"
+        },
+        {
+            "title": "The J & P transformer book: a practical technology of the power transformer",
+            "link": "https://books.google.com/books?hl=en&lr=&id=qjR6kTmZvmQC&oi=fnd&pg=PR9&dq=transformer&ots=_UFEdrY9Dx&sig=QZas25aCkPv0er837UAnRc2baAk",
+            "publicationInfo": "MJ Heathcote - 1998 - books.google.com",
+            "snippet": "… ; Installation of transformers; Designing an installation. The J & P Transformer Book is the … design, installation, and maintenance of power transformers. It is also invaluable as a textbook …",
+            "year": 1998,
+            "citedBy": 855,
+            "pdfUrl": "https://limpreur.info/books-and-magazines/Electronics%20ebook%20collection/HEATHCOTE,%20M.%20J.%20(1998).%20The%20J%20&%20P%20Transformer%20Book%20(12th%20ed.).pdf",
+            "id": "QDHqrpDpYhEJ"
+        },
+        {
+            "title": "MSA transformer",
+            "link": "http://proceedings.mlr.press/v139/rao21a.html?utm_source=miragenews&utm_medium=miragenews&utm_campaign=news",
+            "publicationInfo": "RM Rao, J Liu, R Verkuil, J Meier… - International …, 2021 - proceedings.mlr.press",
+            "snippet": "Unsupervised protein language models trained across millions of diverse sequences learn structure and function of proteins. Protein language models studied to date have been …",
+            "year": 2021,
+            "citedBy": 740,
+            "pdfUrl": "http://proceedings.mlr.press/v139/rao21a/rao21a.pdf",
+            "id": "JcsvzEpOasYJ"
+        },
+        {
+            "title": "Video swin transformer",
+            "link": "http://openaccess.thecvf.com/content/CVPR2022/html/Liu_Video_Swin_Transformer_CVPR_2022_paper.html",
+            "publicationInfo": "Z Liu, J Ning, Y Cao, Y Wei, Z Zhang… - Proceedings of the …, 2022 - openaccess.thecvf.com",
+            "snippet": "… CNNs to Transformers, where pure Transformer architectures … These video models are all built on Transformer layers that … bias of locality in video Transformers, which leads to a better …",
+            "year": 2022,
+            "citedBy": 2275,
+            "pdfUrl": "http://openaccess.thecvf.com/content/CVPR2022/papers/Liu_Video_Swin_Transformer_CVPR_2022_paper.pdf",
+            "id": "1bBd9n0g81AJ"
+        },
+        {
+            "title": "Rwkv: Reinventing rnns for the transformer era",
+            "link": "https://arxiv.org/abs/2305.13048",
+            "publicationInfo": "B Peng, E Alcaide, Q Anthony, A Albalak… - arXiv preprint arXiv …, 2023 - arxiv.org",
+            "snippet": "Transformers have revolutionized almost all natural … to match the same performance as Transformers due to limitations in … efficient parallelizable training of transformers with the efficient …",
+            "year": 2023,
+            "citedBy": 580,
+            "pdfUrl": "https://arxiv.org/pdf/2305.13048",
+            "id": "mQkX72NVGkEJ"
+        }
+    ],
+    "credits": 1
+}
