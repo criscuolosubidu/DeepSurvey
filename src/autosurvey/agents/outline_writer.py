@@ -60,10 +60,10 @@ class outlineWriter():
         papers_chunks, titles_chunks = self.chunking(references_papers, references_titles, chunk_size=chunk_size)
 
         # generate rough section-level outline
-        section_outline = self.generate_rough_outlines(topic=topic, papers_chunks = [papers_chunks[0]], titles_chunks = [titles_chunks[0]], section_num=section_num)[0]
+        section_outline = self.generate_rough_outlines(topic=topic, papers_chunks=[papers_chunks[0]], titles_chunks = [titles_chunks[0]], section_num=section_num)[0]
         
         # generate subsection-level outline
-        subsection_outlines = self.generate_subsection_outlines(topic=topic, section_outline= section_outline)
+        subsection_outlines = self.generate_subsection_outlines(topic=topic, section_outline=section_outline)
         
         final_outline = self.process_outlines(section_outline, subsection_outlines)
 
